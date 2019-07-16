@@ -1,0 +1,31 @@
+﻿@model EventUserPhotos
+@{
+    ViewData["Title"] = "JoinEvent";
+}
+
+<h1>JoinEvent</h1>
+<div class="text-danger" asp-validation-summary="All"></div>
+<div>
+    <div>
+        <form method="post" enctype="multipart/form-data" asp-action="ImageUpload">
+            <div>
+                <label asp-for="PhotoTitle"></label>
+                <textarea asp-for="PhotoTitle" class="form-control"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <div class="col-md-10">
+                    <p>Upload your photo to join:</p>
+                    <input type="file" name="files" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-10">
+                    <input type="hidden" asp-for="EventId" />
+                    <input type="hidden" asp-for="UserId" />
+                    <input type="submit" value="Upload" class="form-control" />
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

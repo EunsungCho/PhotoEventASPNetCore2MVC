@@ -1,0 +1,9 @@
+﻿@model EventPhotoModel
+@{
+    ViewData["Title"] = "Current Event";
+}
+
+<h1>Current Event</h1>
+
+@await Html.PartialAsync("EventDetail", Model)
+

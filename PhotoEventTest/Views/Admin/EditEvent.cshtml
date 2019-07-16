@@ -1,0 +1,177 @@
+﻿@model EventPhotoModel
+@{
+    ViewData["Title"] = "Edit Event";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script>
+    $(function () {
+        $(".date-picker").datepicker({
+            dateFormat: "dd/mm/yy"
+        });
+        $("#txtToDate").datepicker({
+            dateFormat: "dd/mm/yy"
+        });
+    });
+</script>
+@{
+    if (Model.Events != null)
+    {
+        <script>
+            $(function () {
+                $("#showPhoto").dialog({
+                    autoOpen: false,
+                    modal: true,
+                    height: 800,
+                    width: 1200,
+                    title: "Zoomed Image"
+                });
+                $("#eventPhotos img").click(function (e) {
+                    e.preventDefault();
+
+                    $.ajax({
+                        url: "/api/EventPhotoData",
+                        contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+                        method: "POST",
+                        data: { eventId: @Model.Events.EventId, userId: this.attributes["data-userid"].value},
+                        success: function (data) {
+                            $('#showPhoto').html('');
+                            $("<img>").attr({ src: "data:image/jpg;base64," + data }).appendTo("#showPhoto");
+                            $('#showPhoto').dialog('open');
+                        }
+                    })
+                });
+            });
+        </script>
+    }
+}
+<h1>Edit Event</h1>
+<hr />
+<div class="row">
+    <div class="col-md-5">
+        <form asp-action="EditEvent" enctype="multipart/form-data" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Events.EventId" />
+            <div class="form-group">
+                <label asp-for="Events.EventName" class="control-label"></label>
+                <input asp-for="Events.EventName" class="form-control"/>
+                <span asp-validation-for="Events.EventName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Events.StartDate" class="control-label"></label>
+                <input asp-for="Events.StartDate" class="form-control date-picker" />
+                <span asp-validation-for="@Model.Events.StartDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Events.EndDate" class="control-label"></label>
+                <input asp-for="Events.EndDate" class="form-control date-picker" />
+                <span asp-validation-for="Events.EndDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Events.IsClosed" class="control-label"></label>
+                <select class="form-control" asp-for="Events.IsClosed">
+                    @{
+                        if (Model.Events.IsClosed == true)
+                        {
+                            <option selected value="true">YES</option>
+                            <option value="false">NO</option>
+                        }
+                        else
+                        {
+                            <option value="true">YES</option>
+                            <option selected value="false">NO</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="Events.IsClosed" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Events.Winner" class="control-label"></label>
+                <p>@Model.Events.Winner</p>
+                <span asp-validation-for="Events.Winner" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Events.IntroImage" class="control-label"></label>
+                @{
+                    if (Model.Events.IntroImage != null)
+                    {
+                        var base64 = Convert.ToBase64String(Model.Events.IntroImage);
+                        var introImgSrc = $"data:image/jpg;base64, {base64}";
+                        <img src="@introImgSrc" alt="Intro Image" width="400" />
+                    }
+                }
+                <div class="col-md-10">
+                    <p>Upload or Change Event Intro Picture</p>
+                    <input type="file" id="introPicture" name="introPicture" class="form-control" />
+                </div>
+                <span asp-validation-for="Events.IntroImage" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Events.EventRule" class="control-label"></label>
+                <textarea asp-for="Events.EventRule" class="form-control"></textarea>
+                <span asp-validation-for="Events.EventRule" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+    <div class="col-md-7">
+        <div id="showPhoto" style="display:none;"><img id="original" /></div>
+        <div class="row m-1 p-1 col-5">
+            <div class="col-5" id="eventPhotos">
+                <table class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Title</th>
+                            <th>Photo</th>
+                            <th>Score</th>
+                            <th>Set Winner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var i in Model.EventUserPhotos)
+                        {
+                            <tr>
+                                <td>@i.User.FirstName</td>
+                                <td>@i.PhotoTitle</td>
+                                <td>
+                                    @{
+                                        string base64 = Convert.ToBase64String(i.ThumbnailPhoto);
+                                        string imgsrc = $"data:image/jpg;base64, {base64}";
+
+                                        <img id="" src="@imgsrc" alt="thumbnail Image" class="btn" data-userid="@i.UserId" />
+                                    }
+                                </td>
+                                <td class="text-center">@(i.VoteScore ?? 0)</td>
+                                @{
+                                    <td>
+                                        <form asp-action="SetWinner" method="post">
+                                            <input type="hidden" value="@i.UserId" id="winnerId" name="winnerId" />
+                                            <input type="hidden" value="@i.EventId" name="eventId" />
+                                            @{ 
+                                                string setToWinnerUserId = Model.Events.Winner;
+                                                string buttonEnabled = string.Empty;
+                                                if (setToWinnerUserId == i.UserId)
+                                                {
+                                                    buttonEnabled = "disabled";
+                                                }
+                                            }
+                                            <button class="btn btn-primary btn-sm" type="submit" @buttonEnabled>SET</button>
+                                        </form>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

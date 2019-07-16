@@ -1,0 +1,156 @@
+﻿@model EventPhotoModel
+@{
+    ViewData["Title"] = "EventDetail";
+}
+
+@{
+    if (Model.Events != null)
+    {
+        <script>
+            $(function () {
+                $("#showPhoto").dialog({
+                    autoOpen: false,
+                    modal: true,
+                    height: 800,
+                    width: 1200,
+                    title: "Zoomed Image"
+                });
+                $("#eventPhotos img").click(function (e) {
+                    e.preventDefault();
+
+                    $.ajax({
+                        url: "/api/EventPhotoData",
+                        contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+                        method: "POST",
+                        data: { eventId: @Model.Events.EventId, userId: this.attributes["data-userid"].value},
+                        success: function (data) {
+                            $('#showPhoto').html('');
+                            $("<img>").attr({ src: "data:image/jpg;base64," + data }).appendTo("#showPhoto");
+                            $('#showPhoto').dialog('open');
+                        }
+                    })
+                });
+            });
+        </script>
+    }
+}
+
+<div id="showPhoto" style="display:none;"><img id="original" /></div>
+<div class="row m-1 p-1 col-11">
+    @{
+        if (Model.Events == null)
+        {
+            <div class="col-10">
+                <h1>Sorry, No Photo Event</h1>
+            </div>
+            <div class="col-10">
+                <h2>New event comming soon!</h2>
+            </div>
+        }
+        else
+        {
+            <div class="col-5">
+                <h3>@Model.Events.EventName</h3>
+                @{
+                    var base64 = Convert.ToBase64String(Model.Events?.IntroImage);
+                    var imgsrc = string.Format($"data:image/jpg;base64, {base64}");
+
+                    string userIdToVote = Model.UserIdToVote;
+                    string userNameToVote = Model.UserIdToVoteName ?? "no one";
+                    string disabled = userIdToVote == null || userIdToVote == string.Empty ? string.Empty : "disabled";
+
+                    <img src="@imgsrc" alt="Intro Image" width="400" />
+                }
+                <div class="bg-light">
+                    <h4><label asp-for="Events.EventRule"></label></h4>
+                    <div>
+                        @Model.Events.EventRule
+                    </div>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Events.StartDate)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Events.EndDate)
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => Model.Events.StartDate)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => Model.Events.EndDate)
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                @{
+                    bool isEventClosed = Model.Events.IsClosed.Value;
+                    string visibleOrinvisible = isEventClosed ? "invisible" : "visible";
+                    string joinInvisibleCss = Model.EventUserPhotos.SingleOrDefault(e => e.UserId == User.Identity.Name) == null && !isEventClosed ? "visible" : "invisible";
+                }
+                <div class="@joinInvisibleCss">
+                    <a asp-action="JoinEvent" class="btn btn-sm btn-secondary" asp-route-curEventId="@Model.Events.EventId">Join this Event</a>
+                </div>
+            </div>
+            <div class="col-6" id="eventPhotos">
+                <table class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Title</th>
+                            <th>Photo</th>
+                            <th>Score</th>
+                            @{
+                                if (!isEventClosed)
+                                {
+                                    <th>Vote</th>
+                                }
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var i in Model.EventUserPhotos)
+                        {
+                            <tr>
+                                <td>@i.User.FirstName</td>
+                                <td>@i.PhotoTitle</td>
+                                <td>
+                                    @{
+                                        base64 = Convert.ToBase64String(i.ThumbnailPhoto);
+                                        imgsrc = string.Format($"data:image/jpg;base64, {base64}");
+
+                                        <img id="" src="@imgsrc" alt="thumbnail Image" class="btn" data-userid="@i.UserId" />
+                                    }
+                                </td>
+                                <td class="text-center">@(i.VoteScore ?? 0)</td>
+                                @{
+                                    if (!isEventClosed)
+                                    {
+                                        <td>
+                                            <form asp-action="UpdateVote" method="post">
+                                                <input type="hidden" value="@i.UserId" id="UserIdToVote" name="UserIdToVote" />
+                                                <input type="hidden" value="@i.EventId" name="eventId" />
+                                                <button class="btn btn-primary btn-sm" type="submit" @disabled>Vote</button>
+                                            </form>
+                                        </td>
+                                    }
+                                }
+                            </tr>
+                        }
+                        <tr>
+                            <td colspan="5">You voted to @userNameToVote</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        }
+    }
+
+</div>
+

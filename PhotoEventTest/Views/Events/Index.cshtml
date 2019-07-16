@@ -1,0 +1,31 @@
+﻿@model IEnumerable<PhotoEventTest.Models.Events>
+
+@{
+    ViewData["Title"] = "Previous Index";
+}
+
+<h1>Previous Events</h1>
+
+<div class="col-10">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Event Title</th>
+                <th>Date</th>
+                <th>Winner</th>
+                <th>No of Participants</th>
+            </tr>
+            @foreach (var evnt in Model)
+            {
+                <tr>
+                    <td>
+                        <a asp-action="Details" asp-route-eventId="@evnt.EventId">@evnt.EventName</a>
+                    </td>
+                    <td>@evnt.StartDate ~ @evnt.EndDate</td>
+                    <td>@evnt.Winner</td>
+                    <td>@evnt.EventUserPhotos.Count()</td>
+                </tr>
+            }
+        </thead>
+    </table>
+</div>

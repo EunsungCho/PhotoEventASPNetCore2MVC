@@ -1,0 +1,62 @@
+﻿@model PhotoEventTest.Models.Events
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script>
+    $(function () {
+        $(".date-picker").datepicker({
+            dateFormat: "dd/mm/yy"
+        });
+        $("#txtToDate").datepicker({
+            dateFormat: "dd/mm/yy"
+        });
+    });
+</script>
+
+<h1>New Event</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" enctype="multipart/form-data" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="EventName" class="control-label"></label>
+                <input asp-for="EventName" class="form-control" />
+                <span asp-validation-for="EventName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="StartDate" class="control-label"></label>
+                <input asp-for="StartDate" class="form-control date-picker" />
+                <span asp-validation-for="StartDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EndDate" class="control-label"></label>
+                <input asp-for="EndDate" class="form-control date-picker" />
+                <span asp-validation-for="EndDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="IntroImage" class="control-label"></label>
+                <div class="col-md-10">
+                    <p>Upload new Event Intro Picture</p>
+                    <input type="file" id="newIntroPic" name="newIntroPic" class="form-control" />
+                </div>
+                <span asp-validation-for="IntroImage" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EventRule" class="control-label"></label>
+                <textarea asp-for="EventRule" class="form-control"></textarea>
+                <span asp-validation-for="EventRule" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+

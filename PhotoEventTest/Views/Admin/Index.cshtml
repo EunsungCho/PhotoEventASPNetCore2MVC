@@ -1,0 +1,56 @@
+﻿@model IEnumerable<PhotoEventTest.Models.Events>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h1>Event List</h1>
+
+<div class="col-10">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Event Title</th>
+                <th>Date</th>
+                <th>Winner</th>
+                <th>No of Participants</th>
+                <th>Is Closed?</th>
+                <th>Delete</th>
+            </tr>
+            @foreach (var evnt in Model)
+            {
+            <tr>
+                <td>
+                    <a asp-action="EditEvent" asp-route-eventId="@evnt.EventId">@evnt.EventName</a>
+                </td>
+                <td>@evnt.StartDate ~ @evnt.EndDate</td>
+                <td>@evnt.Winner</td>
+                <td>@evnt.EventUserPhotos.Count()</td>
+                <td>
+                    @{ string closedYesOrNo = evnt.IsClosed == true ? "YES" : "NO"; }
+                    @closedYesOrNo
+                </td>
+                <td>
+                    @{
+                        if (evnt.EventUserPhotos.Count() == 0)
+                        {
+                            <form asp-action="DeleteEvent" method="post">
+                                <input type="hidden" name="eventId" value="@evnt.EventId" />
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-success btn-sm disabled">No Delete</button>
+                        }
+                    }
+                </td>
+            </tr>
+
+            }
+        </thead>
+    </table>
+</div>
+<p>
+    <a asp-action="Create" class="btn btn-sm btn-secondary">Create New Event</a>
+</p>

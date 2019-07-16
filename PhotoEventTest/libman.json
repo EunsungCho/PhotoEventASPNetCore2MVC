@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "defaultProvider": "filesystem",
+  "libraries": [
+    {
+      "library": "D:/Downloaded/jquery-ui-themes-1.12.1/",
+      "destination": "wwwroot/lib/jquery-ui-themes-1.12/"
+    }
+  ]
+}

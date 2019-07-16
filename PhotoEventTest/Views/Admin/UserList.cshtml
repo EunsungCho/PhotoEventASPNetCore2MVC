@@ -1,0 +1,87 @@
+﻿@model IEnumerable<PhotoEventTest.Models.Users>
+
+@{
+    ViewData["Title"] = "UserList";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<script>
+    $(function () {
+        $(".user-event").click(function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: "/Admin/GetUserEVent",
+                //contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+                contentType: "application/json;charset=UTF-8",
+                method: "GET",
+                data: { uid: this.attributes["data-uid"].value },
+                success: function (data) {
+                    alert(data.participatedEvents["Fourth Event"]);
+                    
+                    //$('#showPhoto').html('');
+                    //$("<img>").attr({ src: "data:image/jpg;base64," + data }).appendTo("#showPhoto");
+                    //$('#showPhoto').dialog('open');
+                }
+            })
+        });
+    });
+</script>
+
+<h1>User List</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.UserId)
+            </th>
+            <th>
+                User Name
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EmailAddress)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsAdmin)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EntryDate)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <a asp-action="UserEVentJoinHistory" asp-route-uid="@item.UserId">@item.UserId</a>
+                </td>
+                <td>
+                    @item.FirstName&nbsp;@item.LastName
+                </td>
+                <td>
+                    @item.EmailAddress
+                </td>
+                <td>
+                    @*@Html.DisplayFor(modelItem => item.IsAdmin)*@
+                    @{
+                        string isAdmin;
+                        if (item.IsAdmin == true)
+                        {
+                            isAdmin = "Y";
+                        }
+                        else
+                        {
+                            isAdmin = "N";
+                        }
+                    }
+                    @isAdmin
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EntryDate)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
