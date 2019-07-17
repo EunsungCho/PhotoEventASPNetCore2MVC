@@ -38,6 +38,7 @@ namespace PhotoEventTest.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Save image file into Events table
                 if (newIntroPic != null && newIntroPic.Length > 0)
                 {
                     using (MemoryStream ms = new MemoryStream())
@@ -74,17 +75,20 @@ namespace PhotoEventTest.Controllers
             return View(editingModel);
         }
 
+        // Add new event or replace to new input data
         [HttpPost]
         public IActionResult EditEvent(IFormFile introPicture, EventPhotoModel editingEvent)
         {
             if (ModelState.IsValid)
             {
+                // save new event
                 if (editingEvent.Events.EventId == 0)
                 {
                     _context.Events.Add(editingEvent.Events);
                 }
                 else
                 {
+                    // replace existing data to new input data
                     Events savingEvent = _context.Events.SingleOrDefault(e => e.EventId == editingEvent.Events.EventId);
                     if (savingEvent != null)
                     {
@@ -95,6 +99,7 @@ namespace PhotoEventTest.Controllers
                         savingEvent.EndDate = editingEvent.Events.EndDate;
                         if (introPicture != null && introPicture.Length > 0)
                         {
+                            // when change to new Intro picture
                             using (MemoryStream ms = new MemoryStream())
                             {
                                 introPicture.CopyTo(ms);
@@ -105,6 +110,7 @@ namespace PhotoEventTest.Controllers
                     }
                 }
                 _context.SaveChanges();
+                // TempData is used in _AdminLayout to show what have chagned
                 TempData["actionresult"] = $"{editingEvent.Events.EventName} has been saved";
                 return RedirectToAction("Index");
             }
@@ -115,6 +121,8 @@ namespace PhotoEventTest.Controllers
             }
         }
 
+        // deleting event must be when there are no related EventUserPhotos data.
+        // when there are EventUserPhotos row related to Events, clicking delete button is prevented from being clicked on screen 
         [HttpPost]
         public IActionResult DeleteEvent(int eventId)
         {
@@ -128,6 +136,7 @@ namespace PhotoEventTest.Controllers
             return RedirectToAction("Index");
         }
 
+        // decide who will be the winner of the selected event
         [HttpPost]
         public IActionResult SetWinner(int eventId, string winnerId)
         {
@@ -141,12 +150,14 @@ namespace PhotoEventTest.Controllers
             return RedirectToAction("EditEvent", new { eventId });
         }
 
+        // shows currently registered users
         public IActionResult UserList(string userId)
         {
             IEnumerable<Users> userList = _context.Users.AsQueryable<Users>();
             return View(userList);
         }
 
+        // retrieves events where the user have won and participated in
         public IActionResult UserEVentJoinHistory(string uid)
         {
             IEnumerable<UserEventJoinData> prizeWonEvents = from evt in _context.Events.Where(e => e.Winner == uid)
